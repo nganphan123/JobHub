@@ -8,8 +8,8 @@ from dataclasses import dataclass
 
 @dataclass
 class JobItem:
-    role: str
-    company: str
-    location: str
-    skills: list
-    expand: str
+    role: str = None
+    company: str = None
+    location: str = None
+    skills: list = None
+    describ: list = None

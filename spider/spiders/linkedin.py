@@ -9,9 +9,10 @@ class LinkedInSpider(scrapy.Spider):
     name = "linkedin"
     baseUrl = "https://www.linkedin.com/jobs/search"
 
-    def __init__(self, jobTitle, location):
+    def __init__(self, jobTitle, location, skills):
         self.jobTitle = jobTitle
         self.location = location
+        self.skills = skills.split(",")
 
     def prepareUrl(self) -> str:
         # params from user input
@@ -41,10 +42,13 @@ class LinkedInSpider(scrapy.Spider):
 
         def extract_part(htmlQuery):
             return response.css(htmlQuery).get(default="").strip()
-        item = ({
-            "role": extract_part("div.top-card-layout__entity-info h1.top-card-layout__title::text"),
-            "company": extract_part("a.topcard__org-name-link::text"),
-            "location": extract_part("h4.top-card-layout__second-subline div.topcard__flavor-row span.topcard__flavor.topcard__flavor--bullet::text"),
-            # "describ": extract_part("div.show-more-less-html__markup.relative.overflow-hidden")
+
+        # extract listing items
+        bullets = response.css(
+            "section.show-more-less-html div.show-more-less-html__markup li::text").getall()
+        yield ({
+            'role': extract_part("div.top-card-layout__entity-info h1.top-card-layout__title::text"),
+            'company': extract_part("a.topcard__org-name-link::text"),
+            'location': extract_part("h4.top-card-layout__second-subline div.topcard__flavor-row span.topcard__flavor.topcard__flavor--bullet::text"),
+            'describ': bullets
         })
-        yield item
