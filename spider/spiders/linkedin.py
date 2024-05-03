@@ -15,9 +15,11 @@ class LinkedInSpider(scrapy.Spider):
         self.skills = set(skills.split(","))
         self.page = page
 
-    def prepareUrl(self) -> str:
+    def prepareUrl(self, pageIdx) -> str:
         # params from user input
-        params = {"keywords": self.jobTitle, "location": self.location}
+        # linkedin groups jobs in batch of 25
+        params = {"keywords": self.jobTitle,
+                  "location": self.location, "start": pageIdx*25}
         # encode params to url format
         query = urlencode(params)
         # parse url
@@ -26,9 +28,12 @@ class LinkedInSpider(scrapy.Spider):
         return urlParts._replace(query=query).geturl()
 
     def start_requests(self):
-        url = self.prepareUrl()
-        self.logger.info("Visited %s", url)
-        yield scrapy.Request(url=url, callback=self.parse)
+        firstBatch = self.prepareUrl(self.page*2)
+        secondBatch = self.prepareUrl(self.page*2+1)
+        self.logger.info("Visited %s", firstBatch)
+        yield scrapy.Request(url=firstBatch, callback=self.parse)
+        self.logger.info("Visited %s", secondBatch)
+        yield scrapy.Request(url=secondBatch, callback=self.parse)
 
     def parse(self, response):
         for job in response.css("div.base-card"):
