@@ -7,12 +7,13 @@ import scrapy.responsetypes
 
 class LinkedInSpider(scrapy.Spider):
     name = "linkedin"
-    baseUrl = "https://www.linkedin.com/jobs/search"
+    baseUrl = "https://www.linkedin.com/jobs/api/seeMoreJobPostings/search"
 
-    def __init__(self, jobTitle, location, skills):
+    def __init__(self, jobTitle, location, skills, page):
         self.jobTitle = jobTitle
         self.location = location
-        self.skills = skills.split(",")
+        self.skills = set(skills.split(","))
+        self.page = page
 
     def prepareUrl(self) -> str:
         # params from user input
@@ -33,6 +34,9 @@ class LinkedInSpider(scrapy.Spider):
         for job in response.css("div.base-card"):
             nextPage = job.css("a.base-card__full-link::attr(href)").get()
             if nextPage:
+                # remove query from url
+                nextPage = urlparse.urljoin(
+                    nextPage, urlparse.urlparse(nextPage).path)
                 yield scrapy.Request(url=nextPage, callback=self.parseJobDescrib)
             else:
                 yield ({'error': 'no job description found'})

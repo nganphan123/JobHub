@@ -20,7 +20,7 @@ def main():
     }
     process = CrawlerProcess(settings=settings)
     process.crawl(LinkedInSpider, "software engineer",
-                  "canada", "aws,python,java,c++")
+                  "canada", "aws,python,java,c++", 0)
     process.start()
     print("results are ", results)
 
