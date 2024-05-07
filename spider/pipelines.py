@@ -13,10 +13,11 @@ from spacy.matcher import PhraseMatcher
 from skillNer.general_params import SKILL_DB
 from skillNer.skill_extractor_class import SkillExtractor
 import asyncio
+from spiders import PreItem
 
 
 class SpiderPipeline:
-    async def process_item(self, item, spider):
+    async def process_item(self, item: PreItem, spider):
         def skill_extractor_items(jobDesc):
             # skillNer
             # init params of skill extractor
@@ -29,11 +30,17 @@ class SpiderPipeline:
                 # skillNer extracts technical skillss
                 annotation = skill_extractor.annotate(job)
                 # list of full matches skills
-                extractedSkills = [fullMatch["doc_node_value"]
-                                   for fullMatch in annotation["results"]["full_matches"]]
+                extractedSkills = [
+                    fullMatch["doc_node_value"]
+                    for fullMatch in annotation["results"]["full_matches"]
+                ]
                 # list of ngram scored skills
-                extractedSkills.extend([ngramScored["doc_node_value"]
-                                       for ngramScored in annotation["results"]["ngram_scored"]])
+                extractedSkills.extend(
+                    [
+                        ngramScored["doc_node_value"]
+                        for ngramScored in annotation["results"]["ngram_scored"]
+                    ]
+                )
                 # check if any user's skills matched
                 matched = set(extractedSkills).intersection(spider.skills)
                 if matched:
@@ -45,14 +52,13 @@ class SpiderPipeline:
             skills, describ = await asyncio.to_thread(skill_extractor_items, jobDesc)
             return skills, describ
 
-        adapter = ItemAdapter(item)
         jobItem = JobItem(skills=[])
-        skills, describ = await async_wrapper(adapter.get("describ"))
+        skills, describ = await async_wrapper(item.describ)
         # if the job matches at least one skill, return. Else, drop item
         if skills:
-            jobItem.company = adapter.get("company")
-            jobItem.role = adapter.get("role")
-            jobItem.location = adapter.get("location")
+            jobItem.company = item.company
+            jobItem.role = item.role
+            jobItem.location = item.location
             jobItem.describ = describ
             jobItem.skills = skills
             return jobItem

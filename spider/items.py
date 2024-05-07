@@ -8,6 +8,8 @@ from dataclasses import dataclass
 
 @dataclass
 class JobItem:
+    """Item produced from scrapy pipelines with processed data"""
+
     role: str = None
     company: str = None
     location: str = None
