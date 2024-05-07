@@ -2,7 +2,7 @@ from scrapy.crawler import CrawlerProcess
 from spiders import IndeedSpider, LinkedInSpider
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
-import settings as customSettings
+from scrapy.utils.project import get_project_settings
 import args
 
 
@@ -23,17 +23,10 @@ def main():
 
     # store new scraped item to results
     dispatcher.connect(store_crawler_item, signal=signals.item_scraped)
-    settings = {
-        "REQUEST_FINGERPRINTER_IMPLEMENTATION": customSettings.REQUEST_FINGERPRINTER_IMPLEMENTATION,
-        "TWISTED_REACTOR": customSettings.TWISTED_REACTOR,
-        "FEED_EXPORT_ENCODING": customSettings.FEED_EXPORT_ENCODING,
-        "ITEM_PIPELINES": customSettings.ITEM_PIPELINES,
-    }
+    settings = get_project_settings()
     process = CrawlerProcess(settings=settings)
     process.crawl(
-        get_provider_handler(
-            args.get_provider(options.provider)
-        ),
+        get_provider_handler(args.get_provider(options.provider)),
         "software engineer",
         "canada",
         "aws,python,java,c++",
