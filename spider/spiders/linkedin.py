@@ -1,6 +1,7 @@
 import scrapy
 import urllib.parse as urlparse
 from urllib.parse import urlencode
+from .items import PreItem
 
 import scrapy.responsetypes
 
@@ -18,8 +19,11 @@ class LinkedInSpider(scrapy.Spider):
     def prepareUrl(self, pageIdx) -> str:
         # params from user input
         # linkedin groups jobs in batch of 25
-        params = {"keywords": self.jobTitle,
-                  "location": self.location, "start": pageIdx*25}
+        params = {
+            "keywords": self.jobTitle,
+            "location": self.location,
+            "start": pageIdx * 25,
+        }
         # encode params to url format
         query = urlencode(params)
         # parse url
@@ -28,8 +32,8 @@ class LinkedInSpider(scrapy.Spider):
         return urlParts._replace(query=query).geturl()
 
     def start_requests(self):
-        firstBatch = self.prepareUrl(self.page*2)
-        secondBatch = self.prepareUrl(self.page*2+1)
+        firstBatch = self.prepareUrl(self.page * 2)
+        secondBatch = self.prepareUrl(self.page * 2 + 1)
         self.logger.info("Visited %s", firstBatch)
         yield scrapy.Request(url=firstBatch, callback=self.parse)
         self.logger.info("Visited %s", secondBatch)
@@ -40,11 +44,10 @@ class LinkedInSpider(scrapy.Spider):
             nextPage = job.css("a.base-card__full-link::attr(href)").get()
             if nextPage:
                 # remove query from url
-                nextPage = urlparse.urljoin(
-                    nextPage, urlparse.urlparse(nextPage).path)
+                nextPage = urlparse.urljoin(nextPage, urlparse.urlparse(nextPage).path)
                 yield scrapy.Request(url=nextPage, callback=self.parseJobDescrib)
             else:
-                yield ({'error': 'no job description found'})
+                yield ({"error": "no job description found"})
 
     def parseJobDescrib(self, response):
         self.logger.info("Visited next page %s", response.url)
@@ -54,10 +57,16 @@ class LinkedInSpider(scrapy.Spider):
 
         # extract listing items
         bullets = response.css(
-            "section.show-more-less-html div.show-more-less-html__markup li::text").getall()
-        yield ({
-            'role': extract_part("div.top-card-layout__entity-info h1.top-card-layout__title::text"),
-            'company': extract_part("a.topcard__org-name-link::text"),
-            'location': extract_part("h4.top-card-layout__second-subline div.topcard__flavor-row span.topcard__flavor.topcard__flavor--bullet::text"),
-            'describ': bullets
-        })
+            "section.show-more-less-html div.show-more-less-html__markup li::text"
+        ).getall()
+        item = PreItem(
+            role=extract_part(
+                "div.top-card-layout__entity-info h1.top-card-layout__title::text"
+            ),
+            company=extract_part("a.topcard__org-name-link::text"),
+            location=extract_part(
+                "h4.top-card-layout__second-subline div.topcard__flavor-row span.topcard__flavor.topcard__flavor--bullet::text"
+            ),
+            describ=bullets,
+        )
+        yield (item)
