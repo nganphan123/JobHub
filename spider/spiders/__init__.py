@@ -4,4 +4,5 @@
 # your spiders.
 
 from .linkedin import LinkedInSpider
+from .indeed import IndeedSpider
 from .items import PreItem

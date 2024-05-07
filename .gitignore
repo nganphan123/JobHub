@@ -5,3 +5,5 @@ venv2
 
 # pycache
 *\__pycache__
+
+*.json
