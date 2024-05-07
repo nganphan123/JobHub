@@ -2,6 +2,7 @@ import scrapy
 import urllib.parse as urlparse
 import re
 import json
+from .items import PreItem
 
 
 class IndeedSpider(scrapy.Spider):
@@ -11,7 +12,6 @@ class IndeedSpider(scrapy.Spider):
     job_list_tag_regex = (
         r'window.mosaic.providerData\["mosaic-provider-jobcards"\]=(\{.+?\});'
     )
-    job_detail_tag_regex = r"_initialData=(\{.+?\});"
     default_headers = {
         "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:105.0) Gecko/20100101 Firefox/105.0",
         "Sec-Fetch-Dest": "document",
@@ -19,18 +19,18 @@ class IndeedSpider(scrapy.Spider):
         "Sec-Fetch-Site": "none",
         "Sec-Fetch-User": "?1",
     }
-    empty_result = {
-        "role": "",
-        "company": "",
-        "location": "",
-        "describ": "",
-    }
 
     def __init__(self, jobTitle, location, skills, page):
         self.jobTitle = jobTitle
         self.location = location
         self.skills = skills
         self.page = page
+
+    def extract_part(self, response, htlm_query, default=""):
+        return response.css(htlm_query).get(default=default).strip()
+
+    def extract_parts(self, response, htlm_query):
+        return response.css(htlm_query).getall()
 
     def prepareUrl(self, pageIdx) -> str:
         params = {
@@ -71,23 +71,21 @@ class IndeedSpider(scrapy.Spider):
             yield ({"error": "failed to find list of jobs"})
 
     def parse_job_description(self, response):
-        # Again, Indeed does store job details in a hidden script
-        job_json_data = re.findall(self.job_detail_tag_regex, response.text)
+        bullets = self.extract_parts(
+            response, "div.jobsearch-jobDescriptionText li::text"
+        )
 
-        def remove_tag(raw_description: str):
-            return re.sub("<.+?>", "", raw_description)
+        item = PreItem(
+            role=self.extract_part(
+                response, '[data-testid="jobsearch-JobInfoHeader-title"] span::text'
+            ),
+            location=self.extract_part(
+                response, '[data-testid="inlineHeader-companyLocation"] div::text'
+            ),
+            company=self.extract_part(
+                response, '[data-testid="inlineHeader-companyName"] a::text'
+            ),
+            describ=bullets,
+        )
 
-        if len(job_json_data) > 0:
-            job_data = json.loads(job_json_data[0])
-            job = job_data["jobInfoWrapperModel"]["jobInfoModel"]
-
-            if job is not None:
-                job_header = job["jobInfoHeaderModel"]
-                yield {
-                    "role": job_header["jobTitle"],
-                    "company": job_header["companyName"],
-                    "location": job_header["formattedLocation"],
-                    "describ": remove_tag(job["sanitizedJobDescription"]),
-                }
-
-        yield self.empty_result
+        yield item
