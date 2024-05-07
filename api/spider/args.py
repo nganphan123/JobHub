@@ -4,16 +4,16 @@ from enum import Enum, unique
 
 @unique
 class Provider(Enum):
-    LINKEDIN = ("linkedin",)
+    LINKEDIN = "linkedin"
     INDEED = "indeed"
 
 
-def get_provider(provider, default):
+def get_provider(provider):
+    print("provider ", provider)
     provider = provider.strip().lower()
     for member in Provider:
         if member.value == provider:
             return member
-    return default
 
 
 def get_arg_parser():
@@ -21,6 +21,6 @@ def get_arg_parser():
         description="Find application job postings based on keywords.",
     )
     parser.add_argument(
-        "-p", "--provider", default=Provider.LINKEDIN, help="Job Posting Sites"
+        "-p", "--provider", default=Provider.LINKEDIN.value, help="Job Posting Sites"
     )
     return parser

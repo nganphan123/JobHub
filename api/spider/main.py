@@ -32,7 +32,7 @@ def main():
     process = CrawlerProcess(settings=settings)
     process.crawl(
         get_provider_handler(
-            args.get_provider(options.provider, args.Provider.LINKEDIN)
+            args.get_provider(options.provider)
         ),
         "software engineer",
         "canada",
