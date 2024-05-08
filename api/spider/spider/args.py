@@ -1,6 +1,6 @@
 import argparse
 from enum import Enum, unique
-from spiders import IndeedSpider, LinkedInSpider
+from .spiders import IndeedSpider, LinkedInSpider
 
 
 @unique
