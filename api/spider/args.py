@@ -1,5 +1,6 @@
 import argparse
 from enum import Enum, unique
+from spiders import IndeedSpider, LinkedInSpider
 
 
 @unique
@@ -8,7 +9,17 @@ class Provider(Enum):
     INDEED = "indeed"
 
 
+def get_provider_handler(provider):
+    """Get spider based on provider enum"""
+    mapper = {
+        Provider.INDEED: IndeedSpider,
+        Provider.LINKEDIN: LinkedInSpider,
+    }
+    return mapper[provider]
+
+
 def get_provider(provider):
+    """Return enum values of provider string"""
     print("provider ", provider)
     provider = provider.strip().lower()
     for member in Provider:

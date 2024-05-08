@@ -1,17 +1,18 @@
 from scrapy.crawler import CrawlerProcess
-from spiders import IndeedSpider, LinkedInSpider
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
 from scrapy.utils.project import get_project_settings
 import args
+from spiders.items import SpiderRequest
 
+"""Example to test spiders"""
 
-def get_provider_handler(provider):
-    mapper = {
-        args.Provider.INDEED: IndeedSpider,
-        args.Provider.LINKEDIN: LinkedInSpider,
-    }
-    return mapper[provider]
+exampleRequest = SpiderRequest(
+    role="software engineer",
+    location="canada",
+    skills=["aws", "python", "java", "c++"],
+    page=0,
+)
 
 
 def main():
@@ -26,11 +27,7 @@ def main():
     settings = get_project_settings()
     process = CrawlerProcess(settings=settings)
     process.crawl(
-        get_provider_handler(args.get_provider(options.provider)),
-        "software engineer",
-        "canada",
-        "aws,python,java,c++",
-        0,
+        args.get_provider_handler(args.get_provider(options.provider)), exampleRequest
     )
     process.start()
     print("results are ", results)

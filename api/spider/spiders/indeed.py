@@ -2,7 +2,7 @@ import scrapy
 import urllib.parse as urlparse
 import re
 import json
-from .items import PreItem
+from .items import PreItem, SpiderRequest
 
 
 class IndeedSpider(scrapy.Spider):
@@ -20,11 +20,11 @@ class IndeedSpider(scrapy.Spider):
         "Sec-Fetch-User": "?1",
     }
 
-    def __init__(self, jobTitle, location, skills, page):
-        self.jobTitle = jobTitle
-        self.location = location
-        self.skills = skills
-        self.page = page
+    def __init__(self, request: SpiderRequest):
+        self.jobTitle = request.role
+        self.location = request.location
+        self.skills = set(request.skills)
+        self.page = request.page
 
     def extract_part(self, response, htlm_query, default=""):
         return response.css(htlm_query).get(default=default).strip()
