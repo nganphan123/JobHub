@@ -5,15 +5,14 @@
 
 
 # useful for handling different item types with a single interface
-from itemadapter import ItemAdapter
 from scrapy.exceptions import DropItem
-from items import JobItem
+from .items import JobItem
 import spacy
 from spacy.matcher import PhraseMatcher
 from skillNer.general_params import SKILL_DB
 from skillNer.skill_extractor_class import SkillExtractor
 import asyncio
-from spiders import PreItem
+from .spiders import PreItem
 
 
 class SpiderPipeline:
@@ -60,7 +59,8 @@ class SpiderPipeline:
             jobItem.role = item.role
             jobItem.location = item.location
             jobItem.describ = describ
-            jobItem.skills = skills
+            # turn skills set to list so it can be serialized when return in api response
+            jobItem.skills = list(skills)
             return jobItem
         else:
             raise DropItem(f"No skills matched in {item}")

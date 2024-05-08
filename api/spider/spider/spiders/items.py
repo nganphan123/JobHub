@@ -9,3 +9,13 @@ class PreItem:
     company: str = None
     location: str = None
     describ: list = None
+
+
+@dataclass
+class SpiderRequest:
+    """Common request object for spiders to process"""
+
+    page: int
+    role: str = None
+    location: str = None
+    skills: list = None

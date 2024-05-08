@@ -1,7 +1,7 @@
 import scrapy
 import urllib.parse as urlparse
 from urllib.parse import urlencode
-from .items import PreItem
+from .items import PreItem, SpiderRequest
 
 import scrapy.responsetypes
 
@@ -10,11 +10,11 @@ class LinkedInSpider(scrapy.Spider):
     name = "linkedin"
     baseUrl = "https://www.linkedin.com/jobs/api/seeMoreJobPostings/search"
 
-    def __init__(self, jobTitle, location, skills, page):
-        self.jobTitle = jobTitle
-        self.location = location
-        self.skills = set(skills.split(","))
-        self.page = page
+    def __init__(self, request: SpiderRequest):
+        self.jobTitle = request.role
+        self.location = request.location
+        self.skills = set(request.skills)
+        self.page = request.page
 
     def prepareUrl(self, pageIdx) -> str:
         # params from user input

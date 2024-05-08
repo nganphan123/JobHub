@@ -9,15 +9,15 @@
 
 BOT_NAME = "spider"
 
-SPIDER_MODULES = ["spider.spiders"]
-NEWSPIDER_MODULE = "spider.spiders"
+SPIDER_MODULES = ["spider.spider.spiders"]
+NEWSPIDER_MODULE = "spider.spider.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "spider (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+# ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
@@ -93,5 +93,5 @@ REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 ITEM_PIPELINES = {
-    "pipelines.SpiderPipeline": 300,
+    "spider.spider.pipelines.SpiderPipeline": 300,
 }
