@@ -27,6 +27,7 @@ interface SelectionProps {
   icon: ReactNode;
   label: string;
   labelId: string;
+  customStyle?: React.CSSProperties;
   // onChange:
 }
 
@@ -34,7 +35,8 @@ export default function Selection({
   options,
   icon,
   label,
-  labelId
+  labelId,
+  customStyle
 }: SelectionProps) {
   const [selected, setSelected] = useState<string[]>([]);
   const handleChange = (event: SelectChangeEvent<typeof selected>) => {
@@ -47,7 +49,7 @@ export default function Selection({
     );
   };
   return (
-    <FormControl sx={{ width: 300 }}>
+    <FormControl style={customStyle}>
       <InputLabel id={labelId}>{label}</InputLabel>
       <Select
         multiple
